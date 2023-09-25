@@ -1,5 +1,5 @@
 use log::{error, info, warn};
-use serde;
+
 use std::collections::{hash_map::DefaultHasher, hash_map::RandomState, HashMap};
 use std::hash::{BuildHasher, Hash, Hasher};
 use teloxide::{
@@ -80,24 +80,19 @@ impl State {
         Some(state)
     }
     fn rnd(&self) -> Option<(String, Film)> {
-        if self.tips.len() > 0 {
+        if !self.tips.is_empty() {
             let state = self.clone();
             let hasher = RandomState::new().build_hasher();
             let rand = hasher.finish() as f64 / std::u64::MAX as f64;
             let urand = (rand * state.tips.len() as f64) as usize;
-            let krand = state
-                .tips
-                .iter()
-                .map(|(id, _)| id.clone())
-                .collect::<Vec<String>>()[urand]
-                .clone();
+            let krand = state.tips.keys().cloned().collect::<Vec<String>>()[urand].clone();
             Some((krand.clone(), state.tips.get(&krand).unwrap().clone()))
         } else {
             None
         }
     }
     fn ls(&self) -> String {
-        if self.tips.len() > 0 {
+        if !self.tips.is_empty() {
             self.tips
                 .iter()
                 .map(|(id, film)| {
@@ -115,7 +110,7 @@ impl State {
         }
     }
     fn la(&self) -> String {
-        if self.seen.len() > 0 {
+        if !self.seen.is_empty() {
             self.seen
                 .iter()
                 .map(|(id, film)| {
@@ -136,13 +131,11 @@ impl State {
         if self.tips.contains_key(&id) {
             let film = self.tips.get(&id).unwrap();
             Some(format!("{:#?}", film))
+        } else if self.seen.contains_key(&id) {
+            let film = self.seen.get(&id).unwrap();
+            Some(format!("{:#?}", film))
         } else {
-            if self.seen.contains_key(&id) {
-                let film = self.seen.get(&id).unwrap();
-                Some(format!("{:#?}", film))
-            } else {
-                None
-            }
+            None
         }
     }
 }
@@ -214,22 +207,22 @@ async fn auth_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command
 async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command) -> HandlerResult {
     match cmd {
         Command::Add(film_str) => {
-            if film_str.len() > 0 {
+            if !film_str.is_empty() {
                 let items: Vec<&str> = film_str.split("||").collect();
                 if items.len() != 3 {
                     error!("Invalid items number: {:?}", items);
                     bot.send_message(
                         msg.chat.id,
-                        format!("⚠️ Invalid items number: title||year||url"),
+                        "⚠️ Invalid items number: title||year||url".to_string(),
                     )
                     .await?;
                 } else {
                     let year = items[1].parse::<u32>().unwrap_or_default();
-                    if year < 1800 || year > 2140 {
+                    if !(1800..=2140).contains(&year) {
                         error!("Invalid film year: {:?}", year);
                         bot.send_message(
                             msg.chat.id,
-                            format!("⚠️ Invalid film year: ∈ [1800, 2140]"),
+                            "⚠️ Invalid film year: ∈ [1800, 2140]".to_string(),
                         )
                         .await?;
                     } else {
@@ -240,13 +233,13 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                             let state = cur_state.add(sha(&film), film.clone());
                             dialogue.update(state).await?;
                             info!("Film {:?} successfully added to tips", film);
-                            bot.send_message(msg.chat.id, format!("👍 Film sucessfully added!"))
+                            bot.send_message(msg.chat.id, "👍 Film sucessfully added!".to_string())
                                 .await?;
                         } else {
                             error!("Add failed, invalid film url: {:?}", url);
                             bot.send_message(
                                 msg.chat.id,
-                                format!("⚠️ Add failed, invalid film url"),
+                                "⚠️ Add failed, invalid film url".to_string(),
                             )
                             .await?;
                         };
@@ -255,30 +248,30 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
             } else {
                 bot.send_message(
                     msg.chat.id,
-                    format!("ℹ️ Usage:   /add <title>||<year>||<url>"),
+                    "ℹ️ Usage:   /add <title>||<year>||<url>".to_string(),
                 )
                 .await?;
             };
         }
         Command::Mv(id) => {
-            if id.len() > 0 {
+            if !id.is_empty() {
                 let cur_state = dialogue.get_or_default().await?;
                 let new_state = cur_state.mv(id.clone());
                 match new_state {
                     Some(state) => {
                         dialogue.update(state).await?;
                         info!("Film {:?} successfully moved", id);
-                        bot.send_message(msg.chat.id, format!("👍 Film sucessfully moved"))
+                        bot.send_message(msg.chat.id, "👍 Film sucessfully moved".to_string())
                             .await?;
                     }
                     None => {
                         error!("Move failed, invalid film id {:?}", id);
-                        bot.send_message(msg.chat.id, format!("⚠️ Move failed, invalid film id"))
+                        bot.send_message(msg.chat.id, "⚠️ Move failed, invalid film id".to_string())
                             .await?;
                     }
                 }
             } else {
-                bot.send_message(msg.chat.id, format!("ℹ️ Usage:   /mv <tips film id>"))
+                bot.send_message(msg.chat.id, "ℹ️ Usage:   /mv <tips film id>".to_string())
                     .await?;
             }
         }
@@ -304,7 +297,7 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                     error!("Random challenge failed, is *tips* empty?");
                     bot.send_message(
                         msg.chat.id,
-                        format!("⚠️ Random challenge failed, is *tips* empty?"),
+                        "⚠️ Random challenge failed, is *tips* empty?".to_string(),
                     )
                     .parse_mode(MarkdownV2)
                     .send()
@@ -313,24 +306,27 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
             }
         }
         Command::Rm(id) => {
-            if id.len() > 0 {
+            if !id.is_empty() {
                 let cur_state = dialogue.get_or_default().await?;
                 let new_state = cur_state.rm(id.clone());
                 match new_state {
                     Some(state) => {
                         dialogue.update(state).await?;
                         info!("Film {} successfully removed", id);
-                        bot.send_message(msg.chat.id, format!("👍 Film sucessfully removed"))
+                        bot.send_message(msg.chat.id, "👍 Film sucessfully removed".to_string())
                             .await?;
                     }
                     None => {
                         error!("Remove failed, invalid film {:?}", id);
-                        bot.send_message(msg.chat.id, format!("⚠️ Remove failed, invalid film id"))
-                            .await?;
+                        bot.send_message(
+                            msg.chat.id,
+                            "⚠️ Remove failed, invalid film id".to_string(),
+                        )
+                        .await?;
                     }
                 }
             } else {
-                bot.send_message(msg.chat.id, format!("ℹ️ Usage:   /rm <seen film id>"))
+                bot.send_message(msg.chat.id, "ℹ️ Usage:   /rm <seen film id>".to_string())
                     .await?;
             }
         }
@@ -351,7 +347,7 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                 .await?;
         }
         Command::Who(id) => {
-            if id.len() > 0 {
+            if !id.is_empty() {
                 let cur_state = dialogue.get_or_default().await?;
                 let info = cur_state.who(id.clone());
                 match info {
@@ -366,12 +362,12 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                     }
                     None => {
                         error!("Info failed, invalid film {:?}", id);
-                        bot.send_message(msg.chat.id, format!("⚠️ Info failed, invalid film id"))
+                        bot.send_message(msg.chat.id, "⚠️ Info failed, invalid film id".to_string())
                             .await?;
                     }
                 }
             } else {
-                bot.send_message(msg.chat.id, format!("ℹ️ Usage:   /who <film id>"))
+                bot.send_message(msg.chat.id, "ℹ️ Usage:   /who <film id>".to_string())
                     .await?;
             }
         }
