@@ -175,7 +175,7 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    let storage: MyStorage = SqliteStorage::open("db.sqlite", Json)
+    let storage: MyStorage = SqliteStorage::open("data/db.sqlite", Json)
         .await
         .unwrap()
         .erase();
