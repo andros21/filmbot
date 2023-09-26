@@ -208,12 +208,12 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
     match cmd {
         Command::Add(film_str) => {
             if !film_str.is_empty() {
-                let items: Vec<&str> = film_str.split("||").collect();
+                let items: Vec<&str> = film_str.split(",,,").collect();
                 if items.len() != 3 {
                     error!("Invalid items number: {:?}", items);
                     bot.send_message(
                         msg.chat.id,
-                        "⚠️ Invalid items number: title||year||url".to_string(),
+                        "⚠️ Invalid items number: title,,,year,,,url".to_string(),
                     )
                     .await?;
                 } else {
@@ -248,7 +248,7 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
             } else {
                 bot.send_message(
                     msg.chat.id,
-                    "ℹ️ Usage:   /add <title>||<year>||<url>".to_string(),
+                    "ℹ️ Usage:   /add <title>,,,<year>,,,<url>".to_string(),
                 )
                 .await?;
             };
