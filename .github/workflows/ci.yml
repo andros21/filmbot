@@ -9,6 +9,7 @@ name: ci
     paths-ignore:
       - LICENSE
       - README.md
+      - fly.toml
       - '.gitignore'
       - '.github/workflows/*'
       - '.github/dependabot.yaml'
@@ -18,6 +19,7 @@ name: ci
     paths-ignore:
       - LICENSE
       - README.md
+      - fly.toml
       - '.gitignore'
       - '.github/workflows/*'
       - '.github/dependabot.yaml'
