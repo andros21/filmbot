@@ -1,0 +1,12 @@
+app = "filmbot"
+primary_region = "cdg"
+
+[env]
+RUST_LOG = "info"
+
+[experimental]
+auto_rollback = true
+
+[mounts]
+source = "data"
+destination = "/home/nonroot/data"

@@ -1,0 +1,41 @@
+---
+name: cd
+
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - flyio
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: deploy filmbot
+    runs-on: ubuntu-latest
+    environment:
+      name: flyio
+    steps:
+      - name: checkout project
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+      - name: install cosign
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19
+      - name: verify filmbot image
+        run: |
+          cosign verify \
+             --certificate-identity \
+             'https://github.com/andros21/filmbot/.github/workflows/ci.yml@refs/heads/master' \
+             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | jq .
+      - name: flyio setup
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: flyio deploy
+        run: |
+          flyctl deploy --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
