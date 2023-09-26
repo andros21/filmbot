@@ -1,0 +1,26 @@
+---
+name: digesta bot
+
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 1 * *"
+
+jobs:
+  image-update:
+    name: image digest update
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+      - uses: chainguard-dev/actions/digesta-bot@main
+        with:
+          title-for-pr: 'chore(Dockerfile): bump glibc-dynamic latest tag digest'
+          commit-message: 'chore(Dockerfile): bump glibc-dynamic latest tag digest'
+          labels-for-pr: dependencies, docker
+          token: ${{ secrets.GITHUB_TOKEN }}
