@@ -101,11 +101,20 @@ jobs:
           provenance: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           load: ${{ github.event_name == 'pull_request' }}
       - name: smoke test
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           set -x
           # only ensure runtime deps are ok
           docker run --rm \
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.docker.outputs.digest }}" &> filmbot.log || true
+          cat filmbot.log
+          grep --quiet --fixed-strings "TELOXIDE_TOKEN" filmbot.log
+      - name: smoke test
+        if: github.event_name == 'pull_request'
+        run: |
+          set -x
+          # only ensure runtime deps are ok
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:devel &> filmbot.log || true
           cat filmbot.log
           grep --quiet --fixed-strings "TELOXIDE_TOKEN" filmbot.log
       - name: cosign filmbot
