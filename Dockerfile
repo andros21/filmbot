@@ -5,7 +5,7 @@
 
 FROM cgr.dev/chainguard/wolfi-base:latest as ssl
 
-FROM cgr.dev/chainguard/glibc-dynamic:latest@sha256:145981d1b8f9f6ab89fc9f528954869a493c90244b9238f392754f739ee017e5
+FROM cgr.dev/chainguard/glibc-dynamic:latest@sha256:677adea04d6c703482c1157cb8bc8670a179f1e749c76f10854ef4da0f712c4e
 
 COPY --from=ssl /usr/lib/libssl.so.* /usr/lib/
 COPY --from=ssl /var/lib/db/sbom/libssl*-*-*.spdx.json /var/lib/db/sbom/
