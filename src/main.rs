@@ -1,7 +1,7 @@
 use log::{error, info, warn};
 
-use std::collections::{hash_map::DefaultHasher, hash_map::RandomState, HashMap};
-use std::hash::{BuildHasher, Hash, Hasher};
+use std::collections::HashMap;
+use std::hash::{BuildHasher, DefaultHasher, Hash, Hasher, RandomState};
 use teloxide::{
     dispatching::dialogue::{serializer::Json, ErasedStorage, SqliteStorage, Storage},
     prelude::*,
