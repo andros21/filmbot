@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
-      - uses: chainguard-dev/digestabot@3830b931642989ef391e6db4c0bbcd2bc20d064f
+      - uses: chainguard-dev/digestabot@7dc10a1f7fb063b5130b1116f26a5a0880c2a00f
         with:
           title-for-pr: 'chore(Dockerfile): bump glibc-dynamic latest tag digest'
           commit-message: 'chore(Dockerfile): bump glibc-dynamic latest tag digest'
