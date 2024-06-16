@@ -130,7 +130,7 @@ jobs:
           cosign sign -y "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.docker.outputs.digest }}"
       - name: install crane
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: imjasonh/setup-crane@00c9e93efa4e1138c9a7a5c594acd6c75a2fbf0c
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e
       - name: tag filmbot (latest)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
