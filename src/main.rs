@@ -266,8 +266,11 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                     }
                     None => {
                         error!("Move failed, invalid film id {:?}", id);
-                        bot.send_message(msg.chat.id, "⚠️ Move failed, invalid film id".to_string())
-                            .await?;
+                        bot.send_message(
+                            msg.chat.id,
+                            "⚠️ Move failed, invalid film id".to_string(),
+                        )
+                        .await?;
                     }
                 }
             } else {
@@ -362,8 +365,11 @@ async fn got_command(bot: Bot, dialogue: MyDialogue, msg: Message, cmd: Command)
                     }
                     None => {
                         error!("Info failed, invalid film {:?}", id);
-                        bot.send_message(msg.chat.id, "⚠️ Info failed, invalid film id".to_string())
-                            .await?;
+                        bot.send_message(
+                            msg.chat.id,
+                            "⚠️ Info failed, invalid film id".to_string(),
+                        )
+                        .await?;
                     }
                 }
             } else {
